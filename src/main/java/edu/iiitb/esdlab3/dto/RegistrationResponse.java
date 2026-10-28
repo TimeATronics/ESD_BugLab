@@ -18,6 +18,7 @@ public class RegistrationResponse {
     private Long eventId;
     private String studentEmail;
     private RegistrationStatus status;
+    private boolean checkedIn;
     private LocalDateTime createdAt;
 
     public static RegistrationResponse from(Registration r) {
@@ -26,6 +27,7 @@ public class RegistrationResponse {
                 r.getEvent().getId(),
                 r.getStudentEmail(),
                 r.getStatus(),
+                r.isCheckedIn(),
                 r.getCreatedAt()
         );
     }

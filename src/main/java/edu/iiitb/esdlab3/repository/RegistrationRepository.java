@@ -4,6 +4,7 @@ import edu.iiitb.esdlab3.entity.Registration;
 import edu.iiitb.esdlab3.entity.RegistrationStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,12 @@ public interface RegistrationRepository
     );
 
     boolean existsByEvent_IdAndStudentEmailIgnoreCaseAndStatus(
+            Long eventId,
+            String studentEmail,
+            RegistrationStatus status
+    );
+
+    Optional<Registration> findByEvent_IdAndStudentEmailIgnoreCaseAndStatus(
             Long eventId,
             String studentEmail,
             RegistrationStatus status

@@ -1,6 +1,8 @@
 package edu.iiitb.esdlab3.service;
 
+import edu.iiitb.esdlab3.dto.CheckInRequest;
 import edu.iiitb.esdlab3.dto.CreateRegistrationRequest;
+import edu.iiitb.esdlab3.dto.TransferRegistrationRequest;
 import edu.iiitb.esdlab3.entity.*;
 import edu.iiitb.esdlab3.exception.*;
 import edu.iiitb.esdlab3.repository.EventRepository;
@@ -58,6 +60,81 @@ public class RegistrationService {
                         RegistrationStatus.ACTIVE
                 )
         );
+    }
+
+    @Transactional
+    public Registration transfer(
+            Long registrationId,
+            TransferRegistrationRequest request) {
+
+        Registration registration = registrationRepository
+                .findById(registrationId)
+                .orElseThrow(
+                        () -> new RegistrationNotFoundException(registrationId)
+                );
+
+        if (registration.getStatus() == RegistrationStatus.CANCELLED) {
+            throw new RegistrationConflictException();
+        }
+
+        if (!registration.getStudentEmail()
+                .equalsIgnoreCase(request.getStudentEmail())) {
+            throw new UnauthorizedOperationException();
+        }
+
+        Event targetEvent = eventService.get(request.getTargetEventId());
+
+        long activeCount = registrationRepository
+                .countByEvent_IdAndStatus(
+                        targetEvent.getId(),
+                        RegistrationStatus.ACTIVE
+                );
+
+        if (activeCount >= targetEvent.getCapacity()) {
+            throw new EventFullException();
+        }
+
+        if (registrationRepository
+                .existsByEvent_IdAndStudentEmailIgnoreCaseAndStatus(
+                        targetEvent.getId(),
+                        registration.getStudentEmail(),
+                        RegistrationStatus.ACTIVE)) {
+            throw new DuplicateRegistrationException();
+        }
+
+        registration.setStatus(RegistrationStatus.CANCELLED);
+
+        return registrationRepository.save(
+                new Registration(
+                        targetEvent,
+                        registration.getStudentEmail(),
+                        RegistrationStatus.ACTIVE
+                )
+        );
+    }
+
+    @Transactional
+    public Registration checkIn(
+            Long eventId,
+            CheckInRequest request) {
+
+        eventService.get(eventId);
+
+        Registration registration = registrationRepository
+                .findByEvent_IdAndStudentEmailIgnoreCaseAndStatus(
+                        eventId,
+                        request.getStudentEmail(),
+                        RegistrationStatus.ACTIVE
+                )
+                .orElseThrow(RegistrationNotFoundException::new);
+
+        if (registration.isCheckedIn()) {
+            throw new AlreadyCheckedInException();
+        }
+
+        registration.markCheckedIn();
+
+        return registrationRepository.save(registration);
     }
 
     public List<Registration> activeForEvent(Long eventId) {

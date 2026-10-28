@@ -49,6 +49,14 @@ public class ApiExceptionHandler {
         return error(HttpStatus.NOT_FOUND, ex.getMessage(), req);
     }
 
+    @ExceptionHandler(UnauthorizedOperationException.class)
+    public ResponseEntity<ApiError> unauthorized(
+            UnauthorizedOperationException ex,
+            HttpServletRequest req) {
+
+        return error(HttpStatus.FORBIDDEN, ex.getMessage(), req);
+    }
+
     @ExceptionHandler(EventFullException.class)
     public ResponseEntity<ApiError> eventFull(
             EventFullException ex,
@@ -60,6 +68,14 @@ public class ApiExceptionHandler {
     @ExceptionHandler(DuplicateRegistrationException.class)
     public ResponseEntity<ApiError> duplicate(
             DuplicateRegistrationException ex,
+            HttpServletRequest req) {
+
+        return error(HttpStatus.CONFLICT, ex.getMessage(), req);
+    }
+
+    @ExceptionHandler(AlreadyCheckedInException.class)
+    public ResponseEntity<ApiError> alreadyCheckedIn(
+            AlreadyCheckedInException ex,
             HttpServletRequest req) {
 
         return error(HttpStatus.CONFLICT, ex.getMessage(), req);
