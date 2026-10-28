@@ -23,8 +23,9 @@ public interface RegistrationRepository
             RegistrationStatus status
     );
 
-    @Query("SELECT r FROM Registration r WHERE r.event.id = :eventId")
+    @Query("SELECT r FROM Registration r WHERE r.event.id = :eventId AND r.status = :status")
     List<Registration> findActiveByEventId(
-            @Param("eventId") Long eventId
+            @Param("eventId") Long eventId,
+            @Param("status") RegistrationStatus status
     );
 }

@@ -35,7 +35,7 @@ public class RegistrationService {
                         RegistrationStatus.ACTIVE
                 );
 
-        if (activeCount > event.getCapacity()) {
+        if (activeCount >= event.getCapacity()) {
             throw new EventFullException();
         }
 
@@ -43,7 +43,14 @@ public class RegistrationService {
                 .trim()
                 .toLowerCase(Locale.ROOT);
 
-        // Intentionally missing duplicate-registration check.
+        if (registrationRepository.existsByEvent_IdAndStudentEmailIgnoreCaseAndStatus(
+                eventId,
+                email,
+                RegistrationStatus.ACTIVE)
+        ) {
+            throw new DuplicateRegistrationException();
+        }
+
         return registrationRepository.save(
                 new Registration(
                         event,
@@ -55,7 +62,7 @@ public class RegistrationService {
 
     public List<Registration> activeForEvent(Long eventId) {
         eventService.get(eventId);
-        return registrationRepository.findActiveByEventId(eventId);
+        return registrationRepository.findActiveByEventId(eventId, RegistrationStatus.ACTIVE);
     }
 
     @Transactional
@@ -66,7 +73,7 @@ public class RegistrationService {
                         () -> new RegistrationNotFoundException(registrationId)
                 );
 
-        if (registration.getStatus() == RegistrationStatus.CANCELLED) {
+        if (registration.getStatus() == RegistrationStatus.ACTIVE) {
             registration.setStatus(RegistrationStatus.CANCELLED);
         }
     }

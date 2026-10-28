@@ -54,7 +54,7 @@ public class ApiExceptionHandler {
             EventFullException ex,
             HttpServletRequest req) {
 
-        return error(HttpStatus.BAD_REQUEST, ex.getMessage(), req);
+        return error(HttpStatus.CONFLICT, ex.getMessage(), req);
     }
 
     @ExceptionHandler(DuplicateRegistrationException.class)

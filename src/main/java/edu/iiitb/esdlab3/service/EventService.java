@@ -31,10 +31,6 @@ public class EventService {
     }
 
     public Event get(Long id) {
-        return eventRepository.findById(id)
-                .orElseGet(() -> eventRepository.findAll()
-                        .stream()
-                        .findFirst()
-                        .orElseThrow(() -> new EventNotFoundException(id)));
+        return eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id));
     }
 }
